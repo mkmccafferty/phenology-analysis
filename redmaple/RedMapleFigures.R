@@ -98,65 +98,6 @@ ggplot(gpredictions2, aes(x = DD_0_wt, y = predicted, fill = Avg_Time_Flush)) +
 dev.off()
 
 
-# figure for the spring 1973 data
-rm(list=ls())
-# read in the data
-rm.clim = read.csv("RedMaple_Townsend1977_withClimate.csv")
-ts = read.csv("RedMaple_TestSites_ClimateNA_Normal_1941_1970SY.csv")
-
-#variable of interest is: DegreeOfFlushing_April1973
-
-#isolate 1973 observations
-rm.clim.73 = rm.clim[which(is.na(rm.clim$DegreeOfFlushing_April1973)==FALSE),]
-
-#make the response variable an ordered factor
-rm.clim.73$DegreeFlushFactor = ordered(rm.clim.73$DegreeOfFlushing_April1973)
-
-# the final model
-# DD_0_wt
-model.dd0wt = polr(DegreeFlushFactor ~ DD_0_wt, data = rm.clim.73, Hess=TRUE)
-summary(model.dd0wt)
-
-gpredictions = data.frame(ggeffects::ggpredict(model.dd0wt,  terms = c("DD_0_wt"), type = "fixed", bias_correction = TRUE))
-
-#round the DD_0 variable
-gpredictions$DD_0_wt = factor(round(gpredictions$x, -2))
-
-colnames(gpredictions)[6] = "DegreeFlushFactor"
-
-gpredictions2 = gpredictions[which(gpredictions$DegreeFlushFactor == 12 | gpredictions$DegreeFlushFactor == 35),]
-
-
-
-ggplot(gpredictions, aes(x = DegreeFlushFactor, y = predicted)) +
-  geom_point(aes(color = DD_0_wt), position =position_dodge(width = 0.5)) + 
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high, color = DD_0_wt), 
-                position = position_dodge(width =0.5), width = 0.3) + 
-  scale_color_viridis(discrete = T) + theme_bw() 
-
-
-#save the following figure
-#png device
-png(filename = "C:/Users/mkmcc/OneDrive - The Pennsylvania State University/MaryMcCafferty/Phenology/Figures/RedMapleSpringSupFig1.png", height = 550, width = 750, unit='px')
-
-
-ggplot(gpredictions2, aes(x = DD_0_wt, y = predicted, fill = DegreeFlushFactor)) + 
-  geom_bar(position = "dodge", stat = "identity") +
-  scale_fill_manual(values = c("#44AA99", "#AA4499")) + 
-  scale_x_discrete(limits = rev(levels(gpredictions2$DD_0_wt)))+
-  theme_bw()+ xlab("Population home climate (Winter degree days below 0 °C)") + ylab("Predicted probability of flush stage")+
-  #ggtitle("Probabilities of bud flush stage across temperature gradient")+
-  labs(fill = "Bud flush\nscore")+
-  theme(legend.text = element_text(size=12), legend.title = element_text(size=12),
-        axis.text.x = element_text(size = 12), axis.text.y = element_text(size=12), 
-        axis.title.x = element_text(size=16), axis.title.y = element_text(size=16))
-
-
-dev.off()
-
-
-
-
 # visualize red maple fall phenology
 # have both budset and leaf fall
 rm(list=ls())
